@@ -14,7 +14,7 @@ from aiogram.filters import CommandStart,Command
 from aiogram.types import Message, FSInputFile, InputFile,InputMediaPhoto, InputMediaVideo
 import asyncio
 
-bot = Bot(token="8444258337:AAHFXW9oDGxCGCVP8bhJN1osn0vlTcX8RV0")  # Вставте сюди ваш токен бота
+bot = Bot(token="8444258337:AAHFXW9oDGxCGCVP8bhJN1osn0vlTcX8RV0")
 dp = Dispatcher()
 
 @dp.message(CommandStart())
@@ -41,11 +41,11 @@ async def info_command(msg:Message):
     """
     await msg.reply(info_text)
 
-@dp.message(F.text.contains("Помоги")) # містить в собі слово допомога
+@dp.message(F.text.contains("Помоги"))
 async def help_request(msg:Message):
     await msg.answer("Сам помогай себе")   
     
-@dp.message(F.text.startswith("Привет")) # починається з фото
+@dp.message(F.text.startswith("Привет"))
 async def excited(msg:Message):
     await msg.answer("Ти кто такой!?")
 
@@ -56,38 +56,55 @@ async def send_photo(msg:Message):
         caption="Как говорил точно не рикролл"
     )
 
-@dp.message(F.text.contains("Я умний")) # містить в собі слово допомога
+@dp.message(F.text.contains("Я умний"))
 async def help_request(msg:Message):
     await msg.answer("Я могу поспорить")   
 
-@dp.message(F.text.contains("Я человек")) # містить в собі слово допомога
+@dp.message(F.text.contains("Я человек"))
 async def help_request(msg:Message):
     await msg.answer("А я робот")   
 
-@dp.message(F.text.contains("Я тупой")) # містить в собі слово допомога
+@dp.message(F.text.contains("Я тупой"))
 async def help_request(msg:Message):
     await msg.answer("Я знаю") 
 
-@dp.message(F.text.contains("Я милионер")) # містить в собі слово допомога
+@dp.message(F.text.contains("Я милионер"))
 async def send_photo(msg:Message):
     await msg.answer_photo(
         photo="https://i.ytimg.com/vi/iun2wopco18/maxresdefault.jpg",
     )
 
-@dp.message(F.text.contains("Я бомж")) # містить в собі слово допомога
+@dp.message(F.text.contains("Я бомж"))
 async def send_photo(msg:Message):
     await msg.answer_photo(
         photo="https://i.pinimg.com/736x/e8/57/38/e85738cd153f28d6eab40e0f41eafc28.jpg",
     )
 
-@dp.message(F.text.contains("Месси или Роналду")) # містить в собі слово допомога
+@dp.message(F.text.contains("Месси или Роналду"))
 async def help_request(msg:Message):
     await msg.answer("Неймар") 
 
-@dp.message(F.text.contains("Я найду тебя")) # містить в собі слово допомога
+@dp.message(F.text.contains("Я найду тебя"))
 async def send_photo(msg:Message):
     await msg.answer_photo(
         photo="https://www.meme-arsenal.com/memes/f06fc8672f70c011598723e280b21d8e.jpg",)
+    
+
+@dp.message(F.text.contains("Я лучше тебя"))
+async def send_photo(msg:Message):
+    await msg.answer_photo(
+        photo="https://lh3.googleusercontent.com/proxy/nUD-nFW7_iPVHolHPfY-q5UZpU85JeGcgMflUw7sNPx2XF_MGIlcbQvhvSF3xBS9Y0lCNlcpJBB430h2vyEwUHZxFDAv4ZoGZZqRhKgAxA",)
+    
+@dp.message(F.text.contains("Ти тупой"))
+async def send_photo(msg:Message):
+    await msg.answer_photo(
+        photo="https://i.pinimg.com/originals/d2/4e/5d/d24e5d320eb85922f6811eeea1693a67.png",)
+    
+@dp.message(F.text.contains("Я люблю тебя"))
+async def send_photo(msg:Message):
+    await msg.answer_photo(
+        photo="https://lh5.googleusercontent.com/proxy/y-bBPezL5WzyrxZxR6Vt-R0GLeIla4zlcGv57BILiiURIPdSzMCAEU8KrmiU4pAdmf4Qf1sRDL5QF-VM1c-BRtrt_aCUTKD-IJUTpqTGjQ",)
+    
 
 async def main():
     await dp.start_polling(bot)
