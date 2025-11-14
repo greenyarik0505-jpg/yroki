@@ -1,0 +1,1096 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Крестики-нолики (С выбором сложности)</title>
+    
+    <style>
+        /* --- CSS Переменные для ТЕМ --- */
+        :root {
+            /* Темная тема по умолчанию */
+            --color-bg: #1e1e2e; 
+            --color-surface: #313244; 
+            --color-card: #45475a; 
+            --color-text: #cdd6f4; 
+            --color-text-subtle: #6c7086;
+            --color-accent: #89b4fa;
+            --color-success: #a6e3a1; 
+            --color-x: #f38ba8; 
+            --color-o: #fab387; 
+            --color-win-bg: #a6e3a1; 
+            --color-win-text: #1e1e2e;
+            --color-move-flash: rgba(255, 255, 255, 0.3);
+            --color-hover-ghost: rgba(255, 255, 255, 0.1);
+            --color-progress: #89b4fa; 
+            --color-score-x: var(--color-x);
+            --color-score-draw: var(--color-accent);
+            --color-score-o: var(--color-o);
+            --modal-bg: #1e1e2e;
+        }
+
+        /* Светлая тема */
+        body.light-theme {
+            --color-bg: #eff1f5;
+            --color-surface: #e6e9ef;
+            --color-card: #d9e0ee;
+            --color-text: #4c4f69;
+            --color-text-subtle: #727b95;
+            --color-accent: #1e66f5;
+            --color-success: #40a02b;
+            --color-x: #d20f39;
+            --color-o: #fe640b;
+            --color-win-bg: #40a02b;
+            --color-win-text: #eff1f5;
+            --color-move-flash: rgba(0, 0, 0, 0.15);
+            --color-hover-ghost: rgba(0, 0, 0, 0.05);
+            --color-progress: #1e66f5;
+            --color-score-x: var(--color-x);
+            --color-score-draw: var(--color-accent);
+            --color-score-o: var(--color-o);
+            --modal-bg: #eff1f5;
+        }
+
+
+        /* --- ОСНОВНЫЕ СТИЛИ --- */
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: var(--color-bg); 
+            color: var(--color-text); 
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        h1 {
+            color: var(--color-accent); 
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        #controls {
+            display: flex;
+            flex-wrap: wrap; 
+            align-items: center;
+            justify-content: center;
+            gap: 15px 20px;
+            margin-bottom: 30px;
+            padding: 0 10px;
+        }
+        
+        #difficulty-select {
+            padding: 10px 15px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: var(--color-card); 
+            color: var(--color-text);
+            border: 2px solid var(--color-accent);
+            border-radius: 8px;
+            font-weight: 700;
+            transition: border-color 0.3s;
+        }
+
+        #theme-toggle {
+            cursor: pointer;
+            font-size: 24px;
+            line-height: 1;
+            padding: 5px;
+            border-radius: 50%;
+            transition: transform 0.2s;
+            color: var(--color-text);
+        }
+
+        #info-bar {
+            display: flex;
+            gap: 25px;
+            margin-bottom: 15px;
+            font-size: 20px;
+            font-weight: 600;
+            padding: 10px 20px;
+            background-color: var(--color-surface);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            min-height: 25px;
+        }
+
+        #current-player-indicator {
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+            color: var(--color-text);
+        }
+        
+        .player-x-turn { background-color: var(--color-x); }
+        .player-o-turn { background-color: var(--color-o); }
+        
+        #score-display {
+            font-size: 18px;
+            font-weight: 700;
+            padding: 5px 10px;
+            background-color: var(--color-card);
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .score-x { color: var(--color-score-x); }
+        .score-draw { color: var(--color-score-draw); }
+        .score-o { color: var(--color-score-o); }
+
+        /* Таблица лидеров */
+        #leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        #leaderboard-table th, #leaderboard-table td {
+            padding: 8px;
+            border-bottom: 1px solid var(--color-card);
+            text-align: center;
+        }
+        #leaderboard-table th {
+            color: var(--color-accent);
+        }
+        .leaderboard-time {
+            font-weight: bold;
+            color: var(--color-success);
+        }
+        .leaderboard-name {
+            color: var(--color-x);
+        }
+
+
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 110px); 
+            grid-template-rows: repeat(3, 110px);
+            gap: 10px; 
+            background-color: var(--color-surface); 
+            border-radius: 15px;
+            padding: 10px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            width: fit-content;
+            transition: transform 0.1s, opacity 0.5s; 
+            opacity: 1; /* ГАРАНТИРУЕМ ВИДИМОСТЬ */
+        }
+        
+        /* Удалены стили fade-in */
+
+        #game-board.vibrate {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .cell {
+            background-color: var(--color-card); 
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 80px; 
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.1s, box-shadow 0.2s;
+            user-select: none;
+            width: 110px; 
+            height: 110px;
+            pointer-events: auto; 
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .cell:not([data-player]):hover::after {
+            content: attr(data-player-symbol);
+            position: absolute;
+            font-size: 80px;
+            color: var(--color-hover-ghost);
+            z-index: 1;
+        }
+
+        .cell:not([data-player]):hover {
+            background-color: var(--color-card); 
+            transform: scale(1.02);
+        }
+        
+        .cell.win {
+            background-color: var(--color-win-bg) !important; 
+            color: var(--color-win-text) !important; 
+            box-shadow: 0 0 20px var(--color-success);
+            transform: scale(1.1);
+        }
+
+        #message {
+            margin-top: 35px;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--color-success); 
+            min-height: 35px;
+            transition: color 0.3s;
+        }
+        
+        .status-win {
+            color: var(--color-win-bg) !important;
+            text-shadow: 0 0 5px var(--color-win-bg);
+        }
+        .status-draw {
+            color: var(--color-accent) !important;
+            text-shadow: 0 0 5px var(--color-accent);
+        }
+        .status-lose { 
+            color: var(--color-x) !important; 
+            text-shadow: 0 0 5px var(--color-x);
+        }
+        .status-impossible { 
+            color: #74c7ec !important; 
+            text-shadow: 0 0 5px #74c7ec;
+        }
+
+        button {
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            background-color: var(--color-accent); 
+            color: var(--color-text);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            box-shadow: 0 4px color-mix(in srgb, var(--color-accent) 50%, black);
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.1s;
+        }
+
+        button:hover, #theme-toggle:hover, #score-display:hover {
+            box-shadow: 0 0 15px var(--color-accent);
+            z-index: 2;
+        }
+
+        button:active {
+            box-shadow: 0 2px color-mix(in srgb, var(--color-accent) 50%, black);
+            transform: translateY(2px);
+        }
+        
+        /* Стили для кнопки "Сдаться" */
+        #surrender-button {
+            background-color: var(--color-x);
+            box-shadow: 0 4px color-mix(in srgb, var(--color-x) 50%, black);
+        }
+        #surrender-button:hover {
+            box-shadow: 0 0 15px var(--color-x);
+        }
+        #surrender-button:active {
+             box-shadow: 0 2px color-mix(in srgb, var(--color-x) 50%, black);
+        }
+
+        .cell[data-player] {
+            font-family: inherit;
+        }
+        .cell[data-player="X_P"] {
+            color: var(--color-x); 
+        }
+
+        .cell[data-player="O_P"] {
+            color: var(--color-o); 
+        }
+
+        #bot-progress-container {
+            height: 8px;
+            width: 100%;
+            max-width: 370px; 
+            background-color: var(--color-card);
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            display: none; 
+        }
+
+        #bot-progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: var(--color-progress);
+            transition: width 0.5s linear;
+        }
+        
+        #game-log {
+            margin-top: 25px;
+            padding: 15px;
+            background-color: var(--color-surface);
+            border-radius: 10px;
+            width: 350px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 14px;
+            border: 1px solid var(--color-card);
+            color: var(--color-text-subtle);
+        }
+        #log-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .log-x { color: var(--color-x); }
+        .log-o { color: var(--color-o); }
+
+
+        /* --- СТИЛИ МОДАЛЬНЫХ ОКОН --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none; 
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: var(--modal-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            color: var(--color-text);
+            max-width: 90vw;
+            width: 400px;
+            border: 1px solid var(--color-accent);
+        }
+        .modal-content h2 {
+            color: var(--color-accent);
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+        .modal-actions button {
+            margin: 15px 10px 0;
+            min-width: 100px;
+        }
+        
+        #unbeatable-counter-display { 
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #74c7ec;
+        }
+
+        /* Медиа-запросы для мобильных устройств */
+        @media (max-width: 450px) {
+            #game-board {
+                grid-template-columns: repeat(3, 90px);
+                grid-template-rows: repeat(3, 90px);
+                gap: 8px;
+            }
+            .cell {
+                width: 90px;
+                height: 90px;
+                font-size: 60px;
+            }
+            #game-log {
+                width: 90vw;
+            }
+            #info-bar {
+                font-size: 16px;
+                gap: 15px;
+            }
+            #score-display {
+                font-size: 16px;
+            }
+            #controls button {
+                padding: 10px 15px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body class="dark-theme">
+
+    <h1>Крестики-нолики (С выбором сложности)</h1>
+    
+    <div id="controls">
+        <select id="difficulty-select">
+            <option value="random">Легкий (Случайный)</option>
+            <option value="medium">Средний</option>
+            <option value="hard">Сложный</option>
+            <option value="ideal" selected>Нереальный (Идеальный)</option>
+        </select>
+        <button id="reset-button">Начать заново</button>
+        <button id="surrender-button">Сдаться 🏳️</button>
+        <button id="reset-score-button">Сбросить счет</button>
+        <div id="theme-toggle">🌙</div> 
+    </div>
+
+    <div id="bot-progress-container">
+        <div id="bot-progress-bar"></div>
+    </div>
+
+    <div id="info-bar">
+        <span id="current-player-indicator">ХОД: X</span>
+        <span id="score-display">Счет: <span class="score-x">0</span> - <span class="score-draw">0</span> - <span class="score-o">0</span></span>
+        <span id="move-counter">Ход: 0</span>
+        <span id="time-counter">Время: 0.0s</span>
+    </div>
+    
+    <div id="game-board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+    </div>
+
+    <div id="message"></div>
+    <div id="unbeatable-counter-display">Серия без поражений: 0</div>
+
+    <div id="game-log">
+        <h3>Журнал ходов:</h3>
+        <ul id="log-list"></ul>
+    </div>
+
+    <div id="stats-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>🏆 Статистика и Рекорды</h2>
+            <p>Победы Игрока (X): <span class="score-x" id="stats-win">0</span></p>
+            <p>Ничьи: <span class="score-draw" id="stats-draw">0</span></p>
+            <p>Победы Бота (O): <span class="score-o" id="stats-lose">0</span></p>
+            <p id="stats-unbeatable">Серия без поражений: 0</p>
+            
+            <hr style="margin: 15px 0; border-color: var(--color-card);">
+            <h3>Лучшее время победы</h3>
+            <table id="leaderboard-table">
+                <thead>
+                    <tr><th>#</th><th>Время</th></tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    </tbody>
+            </table>
+
+            <div class="modal-actions">
+                <button id="modal-stats-close">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-reset-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Начать игру заново?</h2>
+            <p>Вы уверены, что хотите сбросить текущую игру?</p>
+            <div class="modal-actions">
+                <button id="modal-confirm-yes">Да</button>
+                <button id="modal-confirm-no">Нет</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirm-surrender-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Сдаться?</h2>
+            <p>Вы уверены? Это засчитается как поражение.</p>
+            <div class="modal-actions">
+                <button id="modal-surrender-yes" style="background-color: var(--color-x);">Да, сдаюсь</button>
+                <button id="modal-surrender-no">Отмена</button>
+            </div>
+        </div>
+    </div>
+    
+
+    <script>
+        // --- ИГРОВАЯ ЛОГИКА И ПЕРЕМЕННЫЕ ---
+        const cells = document.querySelectorAll('.cell');
+        const messageDisplay = document.getElementById('message');
+        const resetButton = document.getElementById('reset-button');
+        const resetScoreButton = document.getElementById('reset-score-button');
+        const surrenderButton = document.getElementById('surrender-button'); 
+        const themeToggle = document.getElementById('theme-toggle');
+        const body = document.body;
+        const playerIndicator = document.getElementById('current-player-indicator');
+        const gameBoardElement = document.getElementById('game-board');
+        const logList = document.getElementById('log-list');
+        const scoreDisplay = document.getElementById('score-display');
+        const unbeatableDisplay = document.getElementById('unbeatable-counter-display'); 
+        const progressBarContainer = document.getElementById('bot-progress-container');
+        const progressBar = document.getElementById('bot-progress-bar');
+        const difficultySelect = document.getElementById('difficulty-select');
+
+        // Модальные окна
+        const statsModal = document.getElementById('stats-modal');
+        const confirmResetModal = document.getElementById('confirm-reset-modal');
+        const confirmSurrenderModal = document.getElementById('confirm-surrender-modal'); 
+        const modalConfirmYes = document.getElementById('modal-confirm-yes');
+        const modalConfirmNo = document.getElementById('modal-confirm-no');
+        const modalStatsClose = document.getElementById('modal-stats-close');
+        const modalSurrenderYes = document.getElementById('modal-surrender-yes');
+        const modalSurrenderNo = document.getElementById('modal-surrender-no');
+        const leaderboardBody = document.getElementById('leaderboard-body'); 
+        
+        let gameBoard = ['', '', '', '', ['', '', '', '', ''], '', '', '', ''];
+        let currentPlayer = 'X'; 
+        let gameActive = true; 
+        let moveCount = 0; 
+        let gameStartTime = null; 
+        let timerInterval = null; 
+        let starterPlayer = 'O'; 
+        let currentDifficulty = 'ideal'; 
+        
+        let symbols = { 'X': 'X', 'O': 'O' }; 
+        let score = { X: 0, Draw: 0, O: 0 }; 
+        let unbeatableStreak = 0; 
+        let leaderBoard = []; 
+        
+        const PLAYER_MAP = { 'X': 'X_P', 'O': 'O_P' }; 
+        const AI_PLAYER = 'O';
+        const HUMAN_PLAYER = 'X';
+        const BOT_DELAY = 800; 
+
+        const cellNames = { 
+            0: 'Верхний Левый', 1: 'Верхний Центр', 2: 'Верхний Правый',
+            3: 'Средний Левый', 4: 'Центр', 5: 'Средний Правый',
+            6: 'Нижний Левый', 7: 'Нижний Центр', 8: 'Нижний Правый',
+        };
+        
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], 
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], 
+            [0, 4, 8], [2, 4, 6]             
+        ];
+
+        // --- ЗВУКОВЫЕ ЭФФЕКТЫ ---
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(freq, duration, type, volume = 0.5) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.type = type; 
+            oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.start();
+            gainNode.gain.exponentialRampToValueAtTime(0.00001, audioContext.currentTime + duration);
+            oscillator.stop(audioContext.currentTime + duration);
+        }
+
+        // --- ТАЙМЕР ---
+        function startTimer() {
+            gameStartTime = Date.now();
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                if (gameActive) {
+                    const elapsed = (Date.now() - gameStartTime) / 1000;
+                    document.getElementById('time-counter').textContent = `Время: ${elapsed.toFixed(1)}s`;
+                }
+            }, 100);
+        }
+
+        function stopTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = null;
+        }
+
+        // --- ЛОГИКА ИИ (Minimax, Medium, Hard, Random) ---
+        
+        function getAvailableMoves(board) {
+            return board
+                .map((val, index) => (val === '' ? index : null))
+                .filter(index => index !== null);
+        }
+        
+        function checkWin(board, player) {
+            for (const condition of winningConditions) {
+                const [a, b, c] = condition;
+                if (board[a] === player && board[b] === player && board[c] === player) {
+                    return condition; 
+                }
+            }
+            return null;
+        }
+        
+        function findRandomMove(availableMoves) {
+            const randomIndex = Math.floor(Math.random() * availableMoves.length);
+            return availableMoves[randomIndex];
+        }
+
+        function findWinningOrBlockingMove(board, player) {
+            // Ищет выигрышный или блокирующий ход для 'player'
+            for (const index of getAvailableMoves(board)) {
+                let tempBoard = [...board];
+                tempBoard[index] = player;
+                if (checkWin(tempBoard, player)) {
+                    return index;
+                }
+            }
+            return null;
+        }
+
+        function findMediumMove(availableMoves) {
+            // 1. Попытка выиграть (для AI_PLAYER = 'O')
+            let move = findWinningOrBlockingMove(gameBoard, AI_PLAYER);
+            if (move !== null) return move;
+
+            // 2. Блокировка соперника (для HUMAN_PLAYER = 'X')
+            move = findWinningOrBlockingMove(gameBoard, HUMAN_PLAYER);
+            if (move !== null) return move;
+            
+            // 3. Занять центр (индекс 4)
+            if (gameBoard[4] === '') return 4;
+
+            // 4. Случайный ход
+            return findRandomMove(availableMoves);
+        }
+
+        function findHardMove(availableMoves) {
+            // 1. Попытка выиграть (для AI_PLAYER)
+            let move = findWinningOrBlockingMove(gameBoard, AI_PLAYER);
+            if (move !== null) return move;
+
+            // 2. Блокировка соперника (для HUMAN_PLAYER)
+            move = findWinningOrBlockingMove(gameBoard, HUMAN_PLAYER);
+            if (move !== null) return move;
+
+            // 3. Стратегические ходы (центр, углы)
+            const strategicMoves = [4, 0, 2, 6, 8]; 
+            for (const index of strategicMoves) {
+                if (gameBoard[index] === '' && availableMoves.includes(index)) {
+                    return index;
+                }
+            }
+
+            // 4. Случайный ход
+            return findRandomMove(availableMoves);
+        }
+
+        // ИСПРАВЛЕННАЯ ФУНКЦИЯ MINIMAX (для НЕРЕАЛЬНОГО уровня)
+        function minimax(newBoard, player) {
+            const availableMoves = getAvailableMoves(newBoard);
+            const winX = checkWin(newBoard, HUMAN_PLAYER);
+            const winO = checkWin(newBoard, AI_PLAYER);
+
+            // Базовые случаи (Оценка)
+            if (winO) return { score: 10 }; 
+            if (winX) return { score: -10 }; 
+            if (availableMoves.length === 0) return { score: 0 }; 
+            
+            const moves = [];
+            
+            // ИТЕРАЦИЯ
+            for (const index of availableMoves) { 
+                const move = {};
+                move.index = index;
+                newBoard[index] = player; 
+
+                let result;
+                if (player === AI_PLAYER) {
+                    // Рекурсия для минимизации (Игрок)
+                    result = minimax(newBoard, HUMAN_PLAYER);
+                    move.score = result.score;
+                } else {
+                    // Рекурсия для максимизации (Бот)
+                    result = minimax(newBoard, AI_PLAYER);
+                    move.score = result.score;
+                }
+                newBoard[index] = ''; // Отмена хода
+                moves.push(move);
+            }
+
+            // ПОИСК ЛУЧШЕГО ХОДА
+            let bestMove = null;
+            
+            if (player === AI_PLAYER) {
+                // Бот (AI_PLAYER) максимизирует
+                let bestScore = -Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score > bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = moves[i];
+                    }
+                }
+            } else {
+                // Игрок (HUMAN_PLAYER) минимизирует
+                let bestScore = Infinity;
+                for (let i = 0; i < moves.length; i++) {
+                    if (moves[i].score < bestScore) {
+                        bestScore = moves[i].score;
+                        bestMove = moves[i];
+                    }
+                }
+            }
+            return bestMove; 
+        }
+
+        function findStrategicMove(availableMoves) {
+            const move = minimax([...gameBoard], AI_PLAYER); 
+            // Если minimax не нашел хода (чего не должно быть, если availableMoves > 0), берем случайный
+            return move ? move.index : findRandomMove(availableMoves);
+        }
+
+        // --- ОБНОВЛЕНИЕ СТАТИСТИКИ И ИНТЕРФЕЙСА ---
+
+        function updateLeaderBoard(time) { 
+            leaderBoard.push(time);
+            leaderBoard.sort((a, b) => a - b); 
+            leaderBoard = leaderBoard.slice(0, 3); 
+            localStorage.setItem('tictactoeLeaderBoard', JSON.stringify(leaderBoard));
+            renderLeaderBoard();
+        }
+        
+        function renderLeaderBoard() { 
+            leaderboardBody.innerHTML = '';
+            if (leaderBoard.length === 0) {
+                 leaderboardBody.innerHTML = '<tr><td colspan="2">Пока нет рекордов</td></tr>';
+                 return;
+            }
+            leaderBoard.forEach((time, index) => {
+                const row = leaderboardBody.insertRow();
+                const rankCell = row.insertCell();
+                const timeCell = row.insertCell();
+                rankCell.textContent = `#${index + 1}`;
+                timeCell.textContent = `${time.toFixed(1)}s`;
+                timeCell.classList.add('leaderboard-time');
+            });
+        }
+        
+        function updateScoreDisplay() {
+            scoreDisplay.innerHTML = `Счет: <span class="score-x">${score.X}</span> - <span class="score-draw">${score.Draw}</span> - <span class="score-o">${score.O}</span>`;
+            
+            let streakMsg = `Серия без поражений: ${unbeatableStreak}`;
+            if (currentDifficulty === 'ideal') {
+                streakMsg = `Серия без побед над ботом: ${unbeatableStreak}`; 
+            }
+            unbeatableDisplay.textContent = streakMsg;
+        }
+        
+        function updateStatsModal() { 
+            document.getElementById('stats-win').textContent = score.X;
+            document.getElementById('stats-draw').textContent = score.Draw;
+            document.getElementById('stats-lose').textContent = score.O;
+            
+            let streakMsg = `Серия без поражений: ${unbeatableStreak}`;
+            if (currentDifficulty === 'ideal') {
+                streakMsg = `Серия без побед над ботом: ${unbeatableStreak}`;
+            }
+            document.getElementById('stats-unbeatable').textContent = streakMsg;
+            
+            renderLeaderBoard();
+            statsModal.style.display = 'flex';
+        }
+
+        function updateLog(player, index) {
+            const newLogEntry = document.createElement('li');
+            const playerName = player === 'X' ? 'Игрок' : 'Бот';
+            const logClass = player === 'X' ? 'log-x' : 'log-o';
+            
+            newLogEntry.innerHTML = `<span class="${logClass}">${playerName}</span> поставил(а) в <strong>${cellNames[index]}</strong>`;
+            logList.appendChild(newLogEntry);
+            logList.scrollTop = logList.scrollHeight; 
+        }
+
+        function updateInfoBar(player) {
+            if (!gameActive) {
+                playerIndicator.textContent = 'ИГРА ОКОНЧЕНА';
+                playerIndicator.className = '';
+                return;
+            }
+            
+            const difficultyName = difficultySelect.options[difficultySelect.selectedIndex].text;
+            playerIndicator.textContent = `ХОД: ${symbols[player]} | ${difficultyName}`;
+            playerIndicator.className = player === 'X' ? 'player-x-turn' : 'player-o-turn';
+            
+            const ghostSymbol = symbols[player];
+            cells.forEach(cell => {
+                if (!cell.getAttribute('data-player')) {
+                    cell.setAttribute('data-player-symbol', ghostSymbol);
+                }
+            });
+        }
+
+        // --- ЛОГИКА ХОДА ---
+
+        function handleCellClick(clickedCellEvent) {
+            if (!gameActive || currentPlayer === 'O') return;
+
+            const clickedCell = clickedCellEvent.target;
+            const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+            if (gameBoard[clickedCellIndex] !== '') return;
+
+            makeMove(clickedCell, clickedCellIndex, currentPlayer);
+            if (checkForWinOrDraw()) return;
+
+            currentPlayer = 'O';
+            updateInfoBar(currentPlayer);
+            messageDisplay.textContent = `Ход бота (${symbols[AI_PLAYER]})...`;
+            setTimeout(botTurn, 100); 
+        }
+
+        function makeMove(cell, index, player) {
+            gameBoard[index] = player;
+            cell.textContent = symbols[player]; 
+            cell.setAttribute('data-player', PLAYER_MAP[player]); 
+            cell.removeAttribute('data-player-symbol'); 
+            
+            cell.classList.remove('flash');
+            void cell.offsetWidth; 
+            cell.classList.add('flash');
+            
+            playSound(500, 0.1, 'sine', 0.8);
+            
+            moveCount++;
+            updateLog(player, index);
+            document.getElementById('move-counter').textContent = `Ход: ${moveCount}`;
+        }
+
+
+        function botTurn() {
+            progressBarContainer.style.display = 'block'; 
+            progressBar.style.width = '10%'; 
+            
+            const availableMoves = getAvailableMoves(gameBoard);
+            if (availableMoves.length === 0) return; 
+
+            let botMoveIndex = null;
+            let currentDelay = BOT_DELAY;
+
+            if (moveCount === 0 && starterPlayer === 'O') {
+                currentDelay = BOT_DELAY + 400; 
+            }
+            
+            progressBar.style.transitionDuration = `${currentDelay}ms`;
+            progressBar.style.width = '90%'; 
+            
+            setTimeout(() => {
+                // Выбор хода в зависимости от сложности
+                switch (currentDifficulty) {
+                    case 'random':
+                        botMoveIndex = findRandomMove(availableMoves);
+                        break;
+                    case 'medium':
+                        botMoveIndex = findMediumMove(availableMoves);
+                        break;
+                    case 'hard':
+                        botMoveIndex = findHardMove(availableMoves);
+                        break;
+                    case 'ideal':
+                    default:
+                        botMoveIndex = findStrategicMove(availableMoves);
+                        break;
+                }
+
+                if (botMoveIndex !== null) {
+                    const botCell = cells[botMoveIndex];
+                    makeMove(botCell, botMoveIndex, currentPlayer);
+                    checkForWinOrDraw();
+                }
+
+                progressBar.style.width = '100%'; 
+                setTimeout(() => {
+                    progressBarContainer.style.display = 'none';
+                    progressBar.style.transitionDuration = '0s'; 
+                    progressBar.style.width = '0%';
+                }, 100);
+
+
+                if (gameActive) {
+                    currentPlayer = 'X';
+                    updateInfoBar(currentPlayer);
+                    messageDisplay.textContent = `Ваш ход (${symbols[HUMAN_PLAYER]})`;
+                }
+            }, currentDelay); 
+        }
+        
+        function endGame(winner) {
+            stopTimer();
+            gameActive = false;
+            const timeElapsed = (Date.now() - gameStartTime) / 1000;
+            
+            if (winner === 'X') {
+                score.X++; 
+                unbeatableStreak++; 
+                updateLeaderBoard(timeElapsed); 
+                messageDisplay.textContent = `Вы выиграли! 🏆 Время: ${timeElapsed.toFixed(1)}s`;
+                messageDisplay.classList.add('status-win');
+                playSound(440, 0.2, 'square', 0.8);
+                setTimeout(() => playSound(660, 0.3, 'square', 0.8), 100);
+            } else if (winner === 'O') {
+                score.O++; 
+                unbeatableStreak = 0; 
+                
+                let winMsg = `Бот (${difficultySelect.options[difficultySelect.selectedIndex].text}) выиграл. 🤖`;
+                if (currentDifficulty === 'ideal') {
+                    winMsg = `Бот (Нереальный) выиграл. 🤖 Так и должно быть.`;
+                }
+                messageDisplay.textContent = winMsg;
+                messageDisplay.classList.add('status-lose'); 
+                playSound(80, 0.8, 'square', 0.8); 
+            } else if (winner === 'Draw') {
+                score.Draw++; 
+                unbeatableStreak++; 
+                
+                let drawMsg = 'Ничья! 🤝';
+                if (currentDifficulty === 'ideal') {
+                    drawMsg = 'Ничья! 🤝 (Вы справились с Нереальным Ботом!)';
+                    messageDisplay.classList.add('status-impossible'); 
+                }
+                messageDisplay.textContent = drawMsg;
+                messageDisplay.classList.add('status-draw');
+                playSound(100, 0.5, 'sawtooth', 0.6);
+            }
+
+            gameBoardElement.classList.add('vibrate');
+            
+            updateScoreDisplay();
+            
+            cells.forEach(cell => cell.style.pointerEvents = 'none');
+            updateInfoBar(currentPlayer); 
+        }
+
+
+        function checkForWinOrDraw() {
+            const winningLine = checkWin(gameBoard, currentPlayer);
+
+            if (winningLine) {
+                endGame(currentPlayer);
+                winningLine.forEach(index => cells[index].classList.add('win'));
+                return true;
+            }
+
+            if (!gameBoard.includes('')) {
+                endGame('Draw');
+                return true;
+            }
+            return false;
+        }
+        
+        function handleSurrender() { 
+            confirmSurrenderModal.style.display = 'none';
+            if (gameActive) {
+                endGame('O'); 
+            }
+        }
+
+
+        // --- ЛОГИКА СБРОСА И ИНИЦИАЛИЗАЦИИ ---
+        
+        function resetGame(resetScore = false) {
+            stopTimer();
+            confirmResetModal.style.display = 'none';
+            confirmSurrenderModal.style.display = 'none';
+            statsModal.style.display = 'none';
+            
+            if (resetScore) { 
+                score = { X: 0, Draw: 0, O: 0 };
+                unbeatableStreak = 0; 
+                leaderBoard = []; 
+                localStorage.removeItem('tictactoeLeaderBoard');
+            }
+
+            // Ротация первого игрока
+            starterPlayer = starterPlayer === 'X' ? 'O' : 'X'; 
+            currentPlayer = starterPlayer;
+            currentDifficulty = difficultySelect.value; 
+            
+            gameBoard = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true; 
+            moveCount = 0; 
+            logList.innerHTML = ''; 
+            document.getElementById('move-counter').textContent = `Ход: 0`;
+            document.getElementById('time-counter').textContent = `Время: 0.0s`;
+
+            const difficultyName = difficultySelect.options[difficultySelect.selectedIndex].text;
+            messageDisplay.textContent = `Игра началась. Сложность: ${difficultyName}. Первым ходит: ${symbols[currentPlayer]}`;
+            messageDisplay.classList.remove('status-win', 'status-draw', 'status-lose', 'status-impossible');
+
+            gameBoardElement.classList.remove('vibrate');
+            
+            // Удалена логика fade-in. Поле теперь всегда видимо благодаря CSS.
+
+            updateScoreDisplay(); 
+            updateInfoBar(currentPlayer);
+            startTimer();
+
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.removeAttribute('data-player');
+                cell.removeAttribute('data-player-symbol');
+                cell.classList.remove('win', 'flash'); 
+                cell.style.pointerEvents = 'auto'; 
+                
+                cell.setAttribute('data-player-symbol', symbols[currentPlayer]);
+            });
+            
+            if (currentPlayer === 'O') {
+                messageDisplay.textContent = `Ход бота (${symbols[AI_PLAYER]}) на уровне сложности "${difficultyName}"...`;
+                setTimeout(botTurn, 100);
+            }
+        }
+
+        // --- ОБРАБОТЧИКИ СОБЫТИЙ ---
+        
+        function handleResetPrompt() {
+            if (moveCount > 0 && gameActive) {
+                confirmResetModal.style.display = 'flex';
+            } else {
+                resetGame();
+            }
+        }
+        
+        function handleSurrenderPrompt() { 
+            if (gameActive && moveCount > 0) {
+                confirmSurrenderModal.style.display = 'flex';
+            }
+        }
+
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        resetButton.addEventListener('click', handleResetPrompt);
+        resetScoreButton.addEventListener('click', () => resetGame(true));
+        surrenderButton.addEventListener('click', handleSurrenderPrompt); 
+        scoreDisplay.addEventListener('click', updateStatsModal); 
+        
+        // ОБРАБОТЧИК ДЛЯ СЛОЖНОСТИ
+        difficultySelect.addEventListener('change', () => {
+            currentDifficulty = difficultySelect.value;
+            // При смене сложности предлагаем начать новую игру
+            handleResetPrompt(); 
+        });
+
+
+        // Модальные окна
+        modalConfirmYes.addEventListener('click', () => resetGame(false));
+        modalConfirmNo.addEventListener('click', () => confirmResetModal.style.display = 'none');
+        modalStatsClose.addEventListener('click', () => statsModal.style.display = 'none');
+        modalSurrenderYes.addEventListener('click', handleSurrender); 
+        modalSurrenderNo.addEventListener('click', () => confirmSurrenderModal.style.display = 'none');
+
+        // Тема
+        function toggleTheme() {
+            const isLight = body.classList.toggle('light-theme');
+            themeToggle.textContent = isLight ? '☀️' : '🌙';
+        }
+        themeToggle.addEventListener('click', toggleTheme);
+        
+        // Инициализация при загрузке
+        function init() {
+            const storedLeaderBoard = localStorage.getItem('tictactoeLeaderBoard');
+            if (storedLeaderBoard) {
+                leaderBoard = JSON.parse(storedLeaderBoard);
+            }
+            // Установка сложности по умолчанию (Нереальный/Идеальный)
+            difficultySelect.value = 'ideal';
+            // Сброс игры для начальной инициализации
+            resetGame(false); 
+        }
+        init();
+        
+    </script>
+</body>
+</html>
