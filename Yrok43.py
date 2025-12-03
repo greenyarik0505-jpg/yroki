@@ -42,33 +42,3 @@
 # img_response = requests.get(img_url,stream=True) # отримуємо картинку
 # with open("image.jpg","wb") as file: # відкриваємо файл для запису картинки або ж створюємо його
 #     file.write(img_response.content) # записуємо картинку в файл
-
-
-import requests
-from bs4 import BeautifulSoup
-
-# --- ВХОДНЫЕ ДАННЫЕ ---
-URL = "https://www.mcdonalds.com/ua/uk-ua.html"
-LIMIT = 1 # 0 = все элементы
-# ---------------------
-
-# 1. Отправляем запрос и получаем HTML
-headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
-}
-response = requests.get(URL, headers=headers, timeout=10)
-
-# 2. Создаем объект BeautifulSoup
-soup = BeautifulSoup(response.content, 'lxml')
-
-# 3. Извлечение данных (по типу: prices)
-# Поиск элементов по селекторам, содержащим слово "price"
-items = soup.select('div[class*="price"], span[class*="price"], strong')
-results = [item.get_text(strip=True) for item in items]
-final_results = results[:1] # Применяем лимит
-
-# 4. Вывод
-print(f"URL: {URL}")
-print(f"Извлечено {len(final_results)} элементов:")
-for i, result in enumerate(final_results, 1):
-    print(f"  {i}. {result}")
