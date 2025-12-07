@@ -38,14 +38,3 @@
 # shytka = data["value"]
 
 # print(f"Лучшая шутка ето: {shytka}")
-
-
-import requests
-
-url = "https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?json"
-
-response = requests.get(url)
-
-data = response.json()
-
-print(data)
