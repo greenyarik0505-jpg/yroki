@@ -78,7 +78,7 @@ r2.pack()
 r3.pack()
 r4.pack()
 
-Ydar = tk.Button(mainframe, text="Вдарити", bg="#FF0000", fg="white", font=('Arial', 11, 'bold'), command=ydaruti)
+Ydar = tk.Button(mainframe, text="Вдарити", bg="#FF0000", fg="white", font=('Arial', 16, 'bold'), command=ydaruti)
 Ydar.pack(pady=20)
 
 window.mainloop()
