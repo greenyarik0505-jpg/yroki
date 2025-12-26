@@ -17,7 +17,6 @@ def ydaruti():
     global HP_BOSS
     orezue = vubor_oryzue.get()
     
-    # Расчет урона
     if orezue == 1:
         Ydar_ugroka = random.randint(1,10)
         Ydar_bossa = random.randint(35,45)
