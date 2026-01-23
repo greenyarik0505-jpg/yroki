@@ -120,7 +120,7 @@ x = WIDTH//2
 y = HEIGHT//2
 speed = 5  # 5 пікселів за кадр 5 П/к 
 # Налаштування FPS ( кадри за секунду)
-FPS = 60 
+FPS = 60
 clock = pygame.time.Clock()
 xwall = random.randint(0,800)
 ywall = random.randint(0,600)
@@ -157,6 +157,17 @@ while running:
     if y > HEIGHT - 50:
         y = HEIGHT - 50
     screen.fill(WHITE) # очищувати екран 
+
+# Логика поражения
+
+    if x < xwall + 20 and x + 50 > xwall and y < ywall + 100 and y + 50 > ywall:
+        running = False
+
+    if x < xwall2 + 20 and x + 50 > xwall2 and y < ywall2 + 100 and y + 50 > ywall2:
+        running = False
+
+    if x < xwall3 + 20 and x + 50 > xwall3 and y < ywall3 + 100 and y + 50 > ywall3:
+        running = False
 
     pygame.draw.rect(screen,BLUE,(x,y,50,50))
 # 3 стіни 
