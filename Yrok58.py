@@ -138,7 +138,7 @@ def change():
     if zufra == 0:
         label.config(image=img1)
         label.image=img1
-    elif 1 >= zufra >= 5:
+    elif 1 <= zufra <= 5:
         label.config(image=img2)
         label.image=img2
     elif zufra > 5 :
