@@ -6,12 +6,21 @@ WIDTH, HEIGHT = 900, 500  # Встановлюємо ширину та висо�
 FPS = 60  # Встановлюємо кількість кадрів на секунду (швидкість оновлення)
 
 GROUND_Y = 380  # Координата Y для землі (рівень підлоги)
-GRAVITY = 0.9  # Сила тяжіння, яка тягне гравця вниз
+GRAVITY = 0.9  # Сила тяжіння, яка тягне гравця вниз 
 JUMP_VELOCITY = -16  # Сила стрибка (швидкість вгору)
 
 SCROLL_SPEED = 7  # Швидкість руху перешкод вліво
 SPAWN_MIN = 60  # Мінімальний час до появи нової перешкоди
 SPAWN_MAX = 120  # Максимальний час до появи нової перешкоди
+SCROLL_SPEED = 7  # Базова швидкість
+
+# === Чіт-меню стани ===
+cheats = {
+    "god_mode": False,
+    "high_jump": False,
+    "speed_hack": False
+}
+menu_open = False
 
 pygame.init()  # Запускаємо (ініціалізуємо) Pygame
 
@@ -43,12 +52,12 @@ class Player:  # Створюємо клас Гравця (шаблон для �
 
     def jump(self):  # Функція стрибка
         if self.on_ground:  # Якщо гравець стоїть на землі
-            self.vel_y = JUMP_VELOCITY  # Задаємо швидкість вгору (стрибок)
-            if pygame.key.get_pressed()[pygame.K_x]: 
-                self.on_ground = True  # Гравець більше не на землі
-            if not pygame.key.get_pressed()[pygame.K_x]: 
-                self.on_ground = False  # Гравець більше не на землі
-
+            if cheats["high_jump"]: 
+                self.vel_y = JUMP_VELOCITY * 2
+            else:
+                self.vel_y = JUMP_VELOCITY
+            self.on_ground = False  # Гравець більше не на землі
+            
     def update(self):  # Функція оновлення стану гравця (рух, фізика)
 
         self.vel_y += GRAVITY  # Додаємо гравітацію до швидкості (тягне вниз)
@@ -94,7 +103,11 @@ class Obstacle:  # Створюємо клас Перешкоди (шип або
         self.passed = False  # Чи пройшов гравець цю перешкоду?
 
     def update(self):  # Оновлення перешкоди
-        self.rect.x -= SCROLL_SPEED  # Рухаємо перешкоду вліво
+        if cheats["speed_hack"]: 
+            current_speed = SCROLL_SPEED * 1.8
+        else:
+            current_speed = SCROLL_SPEED
+        self.rect.x -= current_speed  # Рухаємо перешкоду вліво
 
     def offscreen(self):  # Перевірка, чи вийшла перешкода за екран
         return self.rect.right < 0  # Якщо правий край менше 0
@@ -133,6 +146,11 @@ player, obstacles, score, alive, frame_until_spawn = reset_Game()
 while True:  # Головний цикл гри (працює постійно)
     clock.tick(FPS)  # Обмежуємо швидкість гри до 60 кадрів/сек
 
+    if menu_open == True:
+        SCROLL_SPEED = 0
+    else:
+        SCROLL_SPEED = 7
+
     for event in pygame.event.get():  # Перевіряємо події (натискання)
         if event.type == pygame.QUIT:  # Якщо натиснули хрестик вікна
             pygame.quit()  # Закриваємо Pygame
@@ -141,6 +159,17 @@ while True:  # Головний цикл гри (працює постійно)
             if event.key in (pygame.K_SPACE, pygame.K_UP):  # Якщо це Пробіл або Стрілка Вгору
                 if alive:  # Якщо гравець живий
                     player.jump()  # Стрибаємо
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_TAB:  # Клавіша для відкриття меню
+                menu_open = not menu_open
+            
+            if menu_open:
+                if event.key == pygame.K_1:
+                    cheats["god_mode"] = not cheats["god_mode"]
+                if event.key == pygame.K_2:
+                    cheats["high_jump"] = not cheats["high_jump"]
+                if event.key == pygame.K_3:
+                    cheats["speed_hack"] = not cheats["speed_hack"]
         
 
     if alive:  # Якщо гравець живий, оновлюємо гру
@@ -160,7 +189,11 @@ while True:  # Головний цикл гри (працює постійно)
                 score += 1  # Додаємо очко
 
             if player.rect.colliderect(obs.hitbox()):  # Якщо гравець врізався
-                alive = False  # Гравець "помер"
+                if cheats["god_mode"]:
+                    pass
+                else:
+                    alive = False  # Гравець "помер"
+
 
         obstacles = [o for o in obstacles if not o.offscreen()]  # Видаляємо перешкоди, що вийшли за екран
 
@@ -193,6 +226,34 @@ while True:  # Головний цикл гри (працює постійно)
             # Центруємо текст на екрані
             screen.blit(game_over_text, (WIDTH // 2 - game_over_text.get_width() // 2, HEIGHT // 2 - 50))
             screen.blit(retry_text, (WIDTH // 2 - retry_text.get_width() // 2, HEIGHT // 2 + 20))
+
+        # --- Малюємо Чіт-Меню ---
+        if menu_open:
+            menu_w, menu_h = 320, 200
+            menu_x, menu_y = (WIDTH - menu_w) // 2, (HEIGHT - menu_h) // 2
+            
+            # Фонова плашка меню
+            pygame.draw.rect(screen, (30, 30, 30), (menu_x, menu_y, menu_w, menu_h), 0, 15)
+            pygame.draw.rect(screen, YELLOW, (menu_x, menu_y, menu_w, menu_h), 3, 15)
+            
+            title = font.render("--- CHEAT MENU ---", True, YELLOW)
+            screen.blit(title, (menu_x + 50, menu_y + 10))
+            
+            # Відображення опцій
+            c1_col = GREEN if cheats["god_mode"] else WHITE
+            c2_col = GREEN if cheats["high_jump"] else WHITE
+            c3_col = GREEN if cheats["speed_hack"] else WHITE
+            
+            txt1 = font.render(f"1. God Mode: {'[ON]' if cheats['god_mode'] else '[OFF]'}", True, c1_col)
+            txt2 = font.render(f"2. High Jump: {'[ON]' if cheats['high_jump'] else '[OFF]'}", True, c2_col)
+            txt3 = font.render(f"3. Speed Hack: {'[ON]' if cheats['speed_hack'] else '[OFF]'}", True, c3_col)
+            
+            screen.blit(txt1, (menu_x + 20, menu_y + 50))
+            screen.blit(txt2, (menu_x + 20, menu_y + 90))
+            screen.blit(txt3, (menu_x + 20, menu_y + 130))
+            
+            hint = font.render("Press TAB to close", True, GRAY)
+            screen.blit(hint, (menu_x + 60, menu_y + 170))
 
         pygame.display.flip()  # Оновлюємо картинку на моніторі
 
