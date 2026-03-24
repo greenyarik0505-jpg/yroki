@@ -1,0 +1,54 @@
+# 1 дз
+
+x = int(input("Введіть число: "))
+
+if x > 0:
+    print("Число додатне")
+elif x == 0:
+    print("Це нуль")
+else:
+    print("Число від'ємне")
+
+# 2 дз
+
+number = int(input("Введіть число для перевірки діапазону: "))
+
+if number >= -4 and number <= 10:
+    print("Число входить у діапазон [-4; 10]")
+else:
+    print("Число НЕ входить у діапазон")
+
+# дз 3
+
+a = int(input("Введіть перше число: "))
+b = int(input("Введіть друге число: "))
+
+if a < b:
+    print(f"Менше число: {a}")
+elif b < a:
+    print(f"Менше число: {b}")
+else:
+    print("Числа рівні")
+
+# дз 4
+
+while True:
+    zadac = int(input("\nВведите, сколько Кириллу нужно задач (от 0 до 10): "))
+
+    if zadac == 0:
+        print("ЗАНОВО ПИШИ, ему этого мало!")
+    elif 1 <= zadac <= 2:
+        print("Супер мало")
+        break
+    elif 3 <= zadac <= 5:
+        print("Мало")
+        break
+    elif 6 <= zadac <= 8:
+        print("+- Нормально")
+        break
+    elif 9 <= zadac <= 10:
+        print("Нормально")
+        break
+    else:
+        print("Ошибка: введите число от 0 до 10!")
+          
