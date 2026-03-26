@@ -1,0 +1,28 @@
+# 1 дз
+
+vvod_name = input("Введи своє ім'я: ")
+vvod_animal = input("Твоя улюблена тварина: ")
+
+print(f"Привіт, {vvod_name}! Я теж люблю тварин, особливо {vvod_animal}!")
+
+# 2 дз
+
+year = int(input("Введи рік твого народження: "))
+
+cezac_year = 2026
+god = cezac_year - year
+
+print(f"Тобі зараз {god} років!")
+
+# дз 3
+
+geroy_name = input("Ім'я лицаря: ")
+geroy_hp = int(input("Рівень здоров'я (ціле число): "))
+geroy_damag = float(input("Сила удару (дробове число): "))
+
+print("\n========== КАРТКА ГЕРОЯ ==========")
+print(f"Ім'я: {geroy_name}")
+print(f"Здоров'я: {geroy_hp} HP")
+print(f"Сила атаки: {geroy_damag}")
+print(f"Критичний удар (x2): {geroy_damag * 2}")
+print("==================================")
