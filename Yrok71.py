@@ -1,5 +1,6 @@
 import random
 
+rehum = 0
 attempts = 0
 max_attempts = 7
 print("===================")
@@ -16,15 +17,12 @@ print("===================")
 print("Я загадав число від 1 до 50.")
 
 while True:
-    if rehun == 1:
+    if rehum == 1:
+            secret = random.randint(1, 30)
             if attempts != 8:
                 print("Я загадав число від 1 до 30.")
-                secret = random.randint(1, 30)
-                answer = input("Твоя версія: ").strip()
+                answer = int(input("Твоя версія: "))
 
-                if not answer.isdigit():
-                    print("Введи саме число.")
-                    continue
 
                 guess = int(answer)
                 attempts += 1
@@ -33,10 +31,12 @@ while True:
                     print(f"Точно. Ти знайшов число за {attempts} спроб.")
                     break
                 
-                if 5 <= secret - answer
+                abz = secret - answer
+                
+                if 5 >= abz:
                     print("Гаряче")
 
-                if 15 <= secret - answer
+                if 15 >= abz:
                     print("Тепло")
 
                 else:
@@ -45,15 +45,12 @@ while True:
                 print("Спроби закінчились")
                 break
 
-    if rehun == 2:
+    if rehum == 2:
+        secret = random.randint(1, 50)
         if attempts != 7:
             print("Я загадав число від 1 до 50.")
-            secret = random.randint(1, 50)
-            answer = input("Твоя версія: ").strip()
+            answer = int(input("Твоя версія: "))
 
-            if not answer.isdigit():
-                print("Введи саме число.")
-                continue
 
             guess = int(answer)
             attempts += 1
@@ -62,10 +59,12 @@ while True:
                 print(f"Точно. Ти знайшов число за {attempts} спроб.")
                 break
             
-            if 5 <= secret - answer
+            abz = secret - answer
+            
+            if 5 >= abz:
                 print("Гаряче")
 
-            if 15 <= secret - answer
+            if 15 >= abz:
                 print("Тепло")
 
             else:
@@ -74,15 +73,11 @@ while True:
             print("Спроби закінчились")
             break
 
-    if rehun == 3:
+    if rehum == 3:
+        secret = random.randint(1, 100)
         if attempts != 7:
             print("Я загадав число від 1 до 100.")
-            secret = random.randint(1, 100)
-            answer = input("Твоя версія: ").strip()
-
-            if not answer.isdigit():
-                print("Введи саме число.")
-                continue
+            answer = int(input("Твоя версія: "))
 
             guess = int(answer)
             attempts += 1
@@ -91,14 +86,16 @@ while True:
                 print(f"Точно. Ти знайшов число за {attempts} спроб.")
                 break
             
-            if 5 <= secret - answer
-                print("Гаряче")
+                abz = secret - answer
+                
+                if 5 >= abz:
+                    print("Гаряче")
 
-            if 15 <= secret - answer
-                print("Тепло")
+                if 15 >= abz:
+                    print("Тепло")
 
-            else:
-                print("Холодно")
+                else:
+                    print("Холодно")
         else:
             print("Спроби закінчились")
             break
