@@ -5,7 +5,7 @@ computer_score = 0
 rounds = 0
 
 print("DICE DUEL")
-a = int(input(f"\nВиберите кількість раундів от 1 до 20."))
+a = int(input(f"\nВиберите кількість раундів от 1 до 20. "))
 
 if a == "":
     rounds = 5
@@ -28,11 +28,11 @@ for round_number in range(1, rounds + 1):
     print(f"Комп'ютер кинув: {computer_roll}")
     
     if player_roll == 6:
-        player_score =+ 1
+        player_score += 1
         print("У игрока додатковий балл")
     
     if computer_roll == 6:
-        computer_roll =+ 1
+        computer_roll += 1
         print("У игрока додатковий балл")
     
     if player_roll > computer_roll:
